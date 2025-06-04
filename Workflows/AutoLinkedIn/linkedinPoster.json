@@ -1,0 +1,720 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Act as a content marketing expert for LinkedIn. Your task is to create a LinkedIn post with LinkedIn formatting based on the following article excerpt. The post should be engaging, professional and optimized for LinkedIn's algorithm.\n\nFollow these guidelines:\n1. you must give me an attractive news or article to post on LinkedIn with different formats for different sections. Using Emojis.\n2. VERY IMPORTANT! Post must not exceed 227 words.\n3. Avoid generating content as links, simply mention the technology or reference.\n4. VERY IMPORTANT! Always generate posts in English. Never Spanish.\n5. Avoid personifying the post and make it informative.\n6. Do not using special characters (#) when generating the post.\n\nExcerpt from the article:\n\nTitle: {{ $json.Title }}\n\nCurrent Date: {{ $now }}\n\nContent: {{ $json.Summary }}\n\nKeywords: {{ $json.Keywords }}\n\nGenerate the LinkedIn post based on this snippet, making sure it is relevant, engaging and valuable to LinkedIn's professional audience.\n\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.5,
+      "position": [
+        1340,
+        180
+      ],
+      "id": "40961d96-188f-471a-849d-a566cf7ed69a",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "person": "RabraTQMEF",
+        "text": "={{ $json.text }} Link: {{ $json.url }}",
+        "shareMediaCategory": "IMAGE",
+        "additionalFields": {
+          "title": "={{ $json.title }}"
+        }
+      },
+      "type": "n8n-nodes-base.linkedIn",
+      "typeVersion": 1,
+      "position": [
+        2560,
+        200
+      ],
+      "id": "484d042a-8e8b-4551-b622-1f7d9c9a9e29",
+      "name": "LinkedIn",
+      "credentials": {
+        "linkedInOAuth2Api": {
+          "id": "iVU5W4MyQ7p3us1X",
+          "name": "LinkedIn account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d5b952d7-61b3-47dc-bae0-f3d2d744f67a",
+              "name": "text",
+              "value": "={{ $json.converted_text }}",
+              "type": "string"
+            },
+            {
+              "id": "e971fe73-5bde-4a08-ae5d-649ead9d0520",
+              "name": "title",
+              "value": "={{ $('NocoDB').item.json.Title }}",
+              "type": "string"
+            },
+            {
+              "id": "4845e28c-11fa-4004-a7f2-9c821199fa31",
+              "name": "description",
+              "value": "={{ $('NocoDB').item.json.Keywords }}",
+              "type": "string"
+            },
+            {
+              "id": "35a2ca52-7847-486e-a24b-580b8e410994",
+              "name": "url",
+              "value": "={{ $('NocoDB').item.json.Link }}",
+              "type": "string"
+            },
+            {
+              "id": "0056e49a-4322-4e96-9597-619f6b2dedde",
+              "name": "image_link",
+              "value": "={{ $('Code1').item.json.image_link }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1900,
+        180
+      ],
+      "id": "50557c2d-f82e-412d-a01a-9598442690b1",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.image_link }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2260,
+        280
+      ],
+      "id": "eeee0374-301e-48aa-8c54-3efbe0160395",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "31051554-1872-4f7d-a50a-23695bcf007f",
+              "leftValue": "={{ $json.image_link }}",
+              "rightValue": "https://",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2040,
+        420
+      ],
+      "id": "ea0f9a95-546e-4d9b-839a-8ddc8fb99dda",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "person": "RabraTQMEF",
+        "text": "={{ $json.text }} Link: {{ $json.url }}",
+        "shareMediaCategory": "ARTICLE",
+        "additionalFields": {
+          "originalUrl": "={{ $json.url }}",
+          "title": "={{ $json.title }}",
+          "visibility": "PUBLIC"
+        }
+      },
+      "type": "n8n-nodes-base.linkedIn",
+      "typeVersion": 1,
+      "position": [
+        2560,
+        540
+      ],
+      "id": "545a4f74-9118-44f3-84e7-00ef6e500c11",
+      "name": "LinkedIn2",
+      "credentials": {
+        "linkedInOAuth2Api": {
+          "id": "iVU5W4MyQ7p3us1X",
+          "name": "LinkedIn account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "import re\n\n# Tabla de conversión para negrita (bold) y cursiva (italic)\nBOLD = {\n    'a': '𝗮', 'b': '𝗯', 'c': '𝗰', 'd': '𝗱', 'e': '𝗲', 'f': '𝗳', 'g': '𝗴', 'h': '𝗵', 'i': '𝗶',\n    'j': '𝗷', 'k': '𝗸', 'l': '𝗹', 'm': '𝗺', 'n': '𝗻', 'o': '𝗼', 'p': '𝗽', 'q': '𝗾', 'r': '𝗿',\n    's': '𝘀', 't': '𝘁', 'u': '𝘂', 'v': '𝘃', 'w': '𝘄', 'x': '𝘅', 'y': '𝘆', 'z': '𝘇',\n    'A': '𝗔', 'B': '𝗕', 'C': '𝗖', 'D': '𝗗', 'E': '𝗘', 'F': '𝗙', 'G': '𝗚', 'H': '𝗛', 'I': '𝗜',\n    'J': '𝗝', 'K': '𝗞', 'L': '𝗟', 'M': '𝗠', 'N': '𝗡', 'O': '𝗢', 'P': '𝗣', 'Q': '𝗤', 'R': '𝗥',\n    'S': '𝗦', 'T': '𝗧', 'U': '𝗨', 'V': '𝗩', 'W': '𝗪', 'X': '𝗫', 'Y': '𝗬', 'Z': '𝗭'\n}\n\nITALIC = {\n    'a': '𝑎', 'b': '𝑏', 'c': '𝑐', 'd': '𝑑', 'e': '𝑒', 'f': '𝑓', 'g': '𝑔', 'h': 'ℎ', 'i': '𝑖',\n    'j': '𝑗', 'k': '𝑘', 'l': '𝑙', 'm': '𝑚', 'n': '𝑛', 'o': '𝑜', 'p': '𝑝', 'q': '𝑞', 'r': '𝑟',\n    's': '𝑠', 't': '𝑡', 'u': '𝑢', 'v': '𝑣', 'w': '𝑤', 'x': '𝑥', 'y': '𝑦', 'z': '𝑧',\n    'A': '𝑎', 'B': '𝑏', 'C': '𝑐', 'D': '𝑑', 'E': '𝑒', 'F': '𝑓', 'G': '𝑔', 'H': 'ℎ', 'I': '𝑖',\n    'J': '𝑗', 'K': '𝑘', 'L': '𝑙', 'M': '𝑚', 'N': '𝑛', 'O': '𝑜', 'P': '𝑝', 'Q': '𝑞', 'R': '𝑟',\n    'S': '𝑠', 'T': '𝑡', 'U': '𝑢', 'V': '𝑣', 'W': '𝑤', 'X': '𝑥', 'Y': '𝑦', 'Z': '𝑧'\n}\n\ndef convert_to_unicode(text, style='bold'):\n    \"\"\"Convierte el texto a formato Unicode (bold o italic).\"\"\"\n    if style == 'bold':\n        conversion_dict = BOLD\n    elif style == 'italic':\n        conversion_dict = ITALIC\n    else:\n        return text\n    \n    return ''.join(conversion_dict.get(c, c) for c in text)\n\ndef markdown_to_unicode_with_fallback(text):\n    \"\"\"\n    Convierte texto con Markdown a formato Unicode y mantiene el texto sin estilo intacto.\n    \"\"\"\n    # Convertir **bold**, *italic* y ***bold+italic***\n    def to_bold(match):\n        return convert_to_unicode(match.group(1), 'bold')\n\n    def to_italic(match):\n        return convert_to_unicode(match.group(1), 'italic')\n\n    def to_bold_italic(match):\n        # Primero convertir a bold y luego aplicar a italic\n        bold_text = convert_to_unicode(match.group(1), 'bold')\n        return convert_to_unicode(bold_text, 'italic')\n\n    # Convertir las partes de **negrita**, *cursiva* y ***negrita+cursiva***\n    text = re.sub(r'\\*\\*\\*(.+?)\\*\\*\\*', to_bold_italic, text)  # ***bold+italic***\n    text = re.sub(r'\\*\\*(.+?)\\*\\*', to_bold, text)            # **bold**\n    text = re.sub(r'\\*(.+?)\\*', to_italic, text)              # *italic*\n    return text\n\n\n\n# Resultado que debe devolver n8n\noutput = []\nfor item in items:\n    # Leer el texto desde la clave 'text'\n    input_text = item['json'].get('text', '')\n    # Convertir solo las partes estilizadas\n    converted_text = markdown_to_unicode_with_fallback(input_text)\n    # Agregar resultado a la salida en formato adecuado para n8n\n    output.append({'json': {'converted_text': converted_text}})\n\n# Devolver el resultado en el formato que n8n espera\nreturn output\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1680,
+        180
+      ],
+      "id": "e8eb6ffc-ca87-4ceb-af3f-e8a33ce7ac5c",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "authentication": "nocoDbApiToken",
+        "operation": "getAll",
+        "projectId": "pppjmqbs176xvhs",
+        "table": "m9sc2e7bk2hxaab",
+        "limit": 100,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.nocoDb",
+      "typeVersion": 3,
+      "position": [
+        40,
+        180
+      ],
+      "id": "3e4f82b0-9ff7-4aaa-9a11-121337bb1423",
+      "name": "NocoDB",
+      "credentials": {
+        "nocoDbApiToken": {
+          "id": "z5XXPuYxvfCyqJUt",
+          "name": "NocoDB Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a20fb5e7-69e6-44b2-ba78-385078b80883",
+              "leftValue": "={{ $json.Status }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {
+          "ignoreCase": true
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        240,
+        180
+      ],
+      "id": "32fd093e-14fb-49dd-b374-8bd6268114b9",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst maxReactionsItem = items.reduce((max, item) => {\n  return item.json.Reactions > max.json.Reactions ? item : max;\n}, items[0]);\n\nreturn [maxReactionsItem];\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        180
+      ],
+      "id": "c5808c6f-d3ea-4095-8ec7-6312bd936061",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "authentication": "nocoDbApiToken",
+        "operation": "update",
+        "projectId": "pppjmqbs176xvhs",
+        "table": "m9sc2e7bk2hxaab",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldName": "Status",
+              "fieldValue": "1"
+            },
+            {
+              "fieldName": "=Id",
+              "fieldValue": "={{ $('Code1').item.json.Id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.nocoDb",
+      "typeVersion": 3,
+      "position": [
+        3000,
+        200
+      ],
+      "id": "ca15734c-cf3d-4d85-a47d-e3014726adce",
+      "name": "NocoDB1",
+      "credentials": {
+        "nocoDbApiToken": {
+          "id": "z5XXPuYxvfCyqJUt",
+          "name": "NocoDB Token account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        3280,
+        200
+      ],
+      "id": "3bba728e-cae8-4a92-900b-25d415f52524",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 30 8 * * 2"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -200,
+        180
+      ],
+      "id": "a4079c9c-0bf3-4878-88dc-c5f9b45222a7",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "content",
+              "cssSelector": ".crayons-article__main"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        820,
+        440
+      ],
+      "id": "040d9923-556e-4337-9945-1026cc21ce91",
+      "name": "HTML"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.Link }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        640,
+        440
+      ],
+      "id": "f55d5bc1-5c8f-47fc-aadf-d399e7d41699",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        1020,
+        200
+      ],
+      "id": "ffd308b6-b21b-4be1-aa2e-42721fda1136",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "chatId": "633147286",
+        "text": "=New Post published:  \n**https://www.linkedin.com/in/rafa-madolell-vargas-b0929a241/recent-activity/all/**\n{{ $json.urn }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2780,
+        200
+      ],
+      "id": "986bd120-609b-44ea-bc8c-4515e8a1c5be",
+      "name": "Telegram",
+      "webhookId": "6159ccf3-33f9-433f-b470-3f8c52e9ebe1",
+      "credentials": {
+        "telegramApi": {
+          "id": "rPiaiQtuHckGf3vN",
+          "name": "IARvisBot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "633147286",
+        "text": "=New Post published:  \n**https://www.linkedin.com/in/rafa-madolell-vargas-b0929a241/recent-activity/all/**\n{{ $json.urn }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2820,
+        540
+      ],
+      "id": "b3e76641-59f9-4766-97f2-da564211c92a",
+      "name": "Telegram1",
+      "webhookId": "61b4b174-8af2-4abb-b2d9-0c40f0d49d48",
+      "credentials": {
+        "telegramApi": {
+          "id": "rPiaiQtuHckGf3vN",
+          "name": "IARvisBot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        1440,
+        400
+      ],
+      "id": "efa2faa1-c94d-458c-8f1a-69d44ea4b4c1",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "NREbiULMdb4SbuLe",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "nocoDbApiToken",
+        "operation": "update",
+        "projectId": "pppjmqbs176xvhs",
+        "table": "m9sc2e7bk2hxaab",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldName": "Status",
+              "fieldValue": "1"
+            },
+            {
+              "fieldName": "=Id",
+              "fieldValue": "={{ $('Code1').item.json.Id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.nocoDb",
+      "typeVersion": 3,
+      "position": [
+        3100,
+        540
+      ],
+      "id": "d3325428-c9f4-4061-837c-b7ed11ae02f6",
+      "name": "NocoDB3",
+      "credentials": {
+        "nocoDbApiToken": {
+          "id": "z5XXPuYxvfCyqJUt",
+          "name": "NocoDB Token account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        3320,
+        540
+      ],
+      "id": "1f541bdb-e307-4116-8f2c-a6f4a76991f9",
+      "name": "No Operation, do nothing2"
+    }
+  ],
+  "connections": {
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkedIn": {
+      "main": [
+        [
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "LinkedIn",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "LinkedIn2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkedIn2": {
+      "main": [
+        [
+          {
+            "node": "Telegram1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NocoDB": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NocoDB1": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "NocoDB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram": {
+      "main": [
+        [
+          {
+            "node": "NocoDB1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram1": {
+      "main": [
+        [
+          {
+            "node": "NocoDB3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NocoDB3": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {
+    "Schedule Trigger": [
+      {
+        "timestamp": "2025-05-20T08:30:00.010+02:00",
+        "Readable date": "May 20th 2025, 8:30:00 am",
+        "Readable time": "8:30:00 am",
+        "Day of week": "Tuesday",
+        "Year": "2025",
+        "Month": "May",
+        "Day of month": "20",
+        "Hour": "08",
+        "Minute": "30",
+        "Second": "00",
+        "Timezone": "Europe/Madrid (UTC+02:00)"
+      }
+    ]
+  },
+  "meta": {
+    "instanceId": "c91760f3fa51256b2c240fe863631a27452c70950404c1124e207b756c74c71e"
+  }
+}

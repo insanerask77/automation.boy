@@ -1,0 +1,808 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "fieldToSplitOut": "data",
+        "options": {
+          "destinationFieldName": "Date"
+        }
+      },
+      "id": "1bdc5dd4-723b-42ed-b06a-e493b890cdd4",
+      "name": "Create single date items",
+      "type": "n8n-nodes-base.itemLists",
+      "position": [
+        -380,
+        100
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data",
+        "options": {
+          "destinationFieldName": "Link"
+        }
+      },
+      "id": "b6253f5b-4a90-46fb-b62c-c056ef8a4abe",
+      "name": "Create single link items",
+      "type": "n8n-nodes-base.itemLists",
+      "position": [
+        -380,
+        260
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "authentication": "nocoDbApiToken",
+        "operation": "create",
+        "projectId": "pppjmqbs176xvhs",
+        "table": "m9sc2e7bk2hxaab",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldName": "=News_Source",
+              "fieldValue": "=Dev.to"
+            },
+            {
+              "fieldName": "Title",
+              "fieldValue": "={{ $json.title }}"
+            },
+            {
+              "fieldName": "Date",
+              "fieldValue": "={{ $json.Date }}"
+            },
+            {
+              "fieldName": "Link",
+              "fieldValue": "={{ $json.Link }}"
+            },
+            {
+              "fieldName": "Summary",
+              "fieldValue": "={{ $json.summary }}"
+            },
+            {
+              "fieldName": "Keywords",
+              "fieldValue": "={{ $json.keywords }}"
+            },
+            {
+              "fieldName": "image_link",
+              "fieldValue": "={{ $json.image_link }}"
+            },
+            {
+              "fieldName": "Reactions",
+              "fieldValue": "={{ $json.Reactions }}"
+            }
+          ]
+        }
+      },
+      "id": "b3a241a4-e0e3-4d24-90a5-b4d46d3c8f59",
+      "name": "NocoDB news database",
+      "type": "n8n-nodes-base.nocoDb",
+      "position": [
+        280,
+        820
+      ],
+      "typeVersion": 2,
+      "credentials": {
+        "nocoDbApiToken": {
+          "id": "z5XXPuYxvfCyqJUt",
+          "name": "NocoDB Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://dev.to/top/week",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          }
+        }
+      },
+      "id": "de2b1ac6-8e84-4ae5-b25b-95492f78c2b4",
+      "name": "Retrieve the web page for further processsing",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -800,
+        260
+      ],
+      "typeVersion": 4.1
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combinationMode": "mergeByPosition",
+        "options": {}
+      },
+      "id": "7b6207e3-9fa2-4c58-b780-fdb6ffe57cb6",
+      "name": "Merge ChatGPT output with Date & Link",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        0,
+        820
+      ],
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "title",
+              "cssSelector": ".crayons-article__header__meta > h1"
+            },
+            {
+              "key": "content",
+              "cssSelector": ".crayons-article__main"
+            },
+            {
+              "key": "image_link",
+              "cssSelector": ".crayons-article__cover > img",
+              "returnValue": "attribute",
+              "attribute": "src"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f6f2b78a-3e4b-40ba-96c8-fda088c4dac6",
+      "name": "Extract individual posts",
+      "type": "n8n-nodes-base.html",
+      "position": [
+        800,
+        260
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combinationMode": "mergeByPosition",
+        "options": {
+          "fuzzyCompare": false
+        }
+      },
+      "id": "de94a0ed-7f4f-4a3c-b9cb-33981001bf83",
+      "name": "Merge Content with Date & Link",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        800,
+        540
+      ],
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "url": "={{ $json[\"Link\"] }}",
+        "options": {}
+      },
+      "id": "ed02c8ad-4825-425c-8c65-840a9614aa16",
+      "name": "HTTP Request1",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        620,
+        260
+      ],
+      "typeVersion": 4.1
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "data",
+              "cssSelector": ".crayons-story__tertiary.fs-xs > time",
+              "returnValue": "attribute",
+              "attribute": "datetime",
+              "returnArray": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ffb6ff69-d1bd-4e3a-92b5-a654015ba773",
+      "name": "Extract date",
+      "type": "n8n-nodes-base.html",
+      "position": [
+        -580,
+        100
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "fields": {
+          "values": [
+            {
+              "name": "keywords",
+              "stringValue": "={{ $json.text }}"
+            }
+          ]
+        },
+        "include": "none",
+        "options": {}
+      },
+      "id": "265c1ce0-9a92-4afc-ba34-1a24ccfcd479",
+      "name": "Rename keywords",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -520,
+        880
+      ],
+      "typeVersion": 3.1
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "data",
+              "cssSelector": "=.crayons-story > a",
+              "returnValue": "attribute",
+              "attribute": "href",
+              "returnArray": true
+            }
+          ]
+        },
+        "options": {
+          "trimValues": true
+        }
+      },
+      "id": "7f47cdf5-1790-4686-80fb-f067e1848ca0",
+      "name": "Extract the HTML with the right css class",
+      "type": "n8n-nodes-base.html",
+      "position": [
+        -580,
+        260
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=name the 3 most important technical keywords in {{ $json[\"content\"] }} ? just name them without any explanations or other sentences"
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.5,
+      "position": [
+        -840,
+        860
+      ],
+      "id": "77b30172-a68d-491e-ae11-efec412a0c81",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "fields": {
+          "values": [
+            {
+              "name": "=summary",
+              "stringValue": "={{ $('Merge Content with Date & Link').item.json.content }}"
+            }
+          ]
+        },
+        "include": "none",
+        "options": {}
+      },
+      "id": "12cfbd7d-8005-42a9-8867-c5bcdf8398f3",
+      "name": "Rename Summary",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -520,
+        700
+      ],
+      "typeVersion": 3.1
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Create a summary in less than 70 words {{ $json[\"content\"] }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.5,
+      "position": [
+        -840,
+        720
+      ],
+      "id": "ac436ec7-2058-465f-ac8b-399ec2eb9bfa",
+      "name": "Basic LLM Chain1"
+    },
+    {
+      "parameters": {
+        "authentication": "nocoDbApiToken",
+        "operation": "getAll",
+        "projectId": "pppjmqbs176xvhs",
+        "table": "m9sc2e7bk2hxaab",
+        "returnAll": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.nocoDb",
+      "typeVersion": 3,
+      "position": [
+        -180,
+        0
+      ],
+      "id": "fe978fda-0a9f-4689-9c74-a1aa97b7e835",
+      "name": "NocoDB",
+      "alwaysOutputData": true,
+      "credentials": {
+        "nocoDbApiToken": {
+          "id": "z5XXPuYxvfCyqJUt",
+          "name": "NocoDB Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Obtener los datos del nodo 'Select posts of last 7 days' (Node A)\nconst nodeAData = $input.all().map(item => ({\n  link: item.json.Link.trim().toLowerCase(), // Normalizamos el enlace\n  date: new Date(item.json.Date), // Convertimos la fecha a un objeto Date para ordenar\n  reactions: parseInt(item.json.Reactions) // Convertimos las reacciones a número\n}));\n\n// Obtener los datos del nodo 'NocoDB' (Node B)\nconst nodeBData = $input.all()[1]?.json; // Suponemos que Node B está conectado correctamente\n\n// Normalizamos los datos de Node B en un conjunto de enlaces únicos\nconst nodeBLinks = new Set(\n  Array.isArray(nodeBData) \n    ? nodeBData.map(item => item.Link.trim().toLowerCase())\n    : [nodeBData?.Link?.trim().toLowerCase()] // Si es un solo objeto\n);\n\n// Filtrar los datos de Node A para excluir enlaces presentes en Node B\nconst filteredData = nodeAData.filter(item => !nodeBLinks.has(item.link));\n\n// Encontrar el post con más reacciones\nconst topPost = filteredData.reduce((max, current) => {\n  return current.reactions > max.reactions ? current : max;\n}, filteredData[0]); // Comenzamos con el primer elemento como el máximo\n\n// Crear el resultado final para el post con más reacciones\nconst result = [{\n  json: {\n    Link: topPost.link,\n    Date: topPost.date.toISOString(), // Convertimos la fecha nuevamente a formato string\n    Reactions: topPost.reactions\n  }\n}];\n\n// Retornar el post con más reacciones\nreturn result;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        280
+      ],
+      "id": "5aa4a4a3-5cf2-4450-a31b-ad90c125c75a",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "fieldsToMatchString": "Link",
+        "joinMode": "keepNonMatches",
+        "outputDataFrom": "input2",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        220,
+        260
+      ],
+      "id": "ad2c2b0e-26d7-4193-84d2-2aeab634f193",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "reactions",
+              "cssSelector": ".crayons-story__bottom > div > a > div:nth-child(1)",
+              "returnArray": true
+            }
+          ]
+        },
+        "options": {
+          "trimValues": true
+        }
+      },
+      "id": "46ea2c39-2c33-4c0c-a800-62a44dc92d1b",
+      "name": "Extract the HTML with the right css class1",
+      "type": "n8n-nodes-base.html",
+      "position": [
+        -580,
+        420
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "reactions",
+        "include": "allOtherFields",
+        "options": {
+          "destinationFieldName": "Reactions"
+        }
+      },
+      "id": "106e7364-e251-44fc-8d4f-c467c5f442e3",
+      "name": "Create single reaction",
+      "type": "n8n-nodes-base.itemLists",
+      "position": [
+        -420,
+        440
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "numberInputs": 3,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        -160,
+        260
+      ],
+      "id": "c9c6d331-2b9d-4a8f-8c8f-b9a64ca85f15",
+      "name": "Merge2"
+    },
+    {
+      "parameters": {
+        "jsCode": "function extraerNumeros(str) {\n  return str.replace(/\\D/g, '');\n}\n\n// Obtener todos los items de entrada\nconst items = $input.all();\n\n// Procesar cada item\nconst resultado = items.map(item => {\n  const textoOriginal = item.json.Reactions || '';\n  const soloNumeros = extraerNumeros(textoOriginal);\n  \n  return {\n    json: {\n      Reactions: soloNumeros\n    }\n  };\n});\n\nreturn resultado;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -280,
+        440
+      ],
+      "id": "21a9c931-fd9f-43b2-b9c2-ca0ae7ee6d98",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "model": "gemma2-9b-it",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -860,
+        1040
+      ],
+      "id": "fe45f070-4c91-4313-8165-68368f5e0e8e",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "jzSl1fYVZmv8LUKb",
+          "name": "Groq account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "gemma2-9b-it",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -720,
+        1040
+      ],
+      "id": "8505a41c-43e0-4a7c-aa31-c8c065e9e27f",
+      "name": "Groq Chat Model1",
+      "credentials": {
+        "groqApi": {
+          "id": "jzSl1fYVZmv8LUKb",
+          "name": "Groq account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Filtrar los 10 elementos más recientes primero\nconst topTenRecentItems = items\n    .sort((a, b) => new Date(b.json[\"Date\"].trim()) - new Date(a.json[\"Date\"].trim())) // Ordenar por fecha (más reciente primero)\n    .slice(0, 20); // Tomar los primeros 10 elementos más recientes\n\n// Ahora ordenar los 10 elementos por número de reacciones (de mayor a menor)\nconst lastTenPopularAndRecentItems = topTenRecentItems\n    .sort((a, b) => {\n        // Primero, ordenar por número de reacciones (de mayor a menor)\n        const reactionsA = parseInt(a.json[\"Reactions\"].split(' ')[0]) || 0;\n        const reactionsB = parseInt(b.json[\"Reactions\"].split(' ')[0]) || 0;\n        return reactionsB - reactionsA; // Ordenar de mayor a menor en reacciones\n    });\n\nreturn lastTenPopularAndRecentItems;\n"
+      },
+      "id": "5b4e45bd-6063-4be4-9dcb-4ca02e3c95e0",
+      "name": "Most reacted las 10 days",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        0,
+        260
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks"
+            }
+          ]
+        }
+      },
+      "id": "97d594a3-8dc3-46c8-b573-ed47c2cff4b0",
+      "name": "Schedule Trigger each week",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [
+        -980,
+        260
+      ],
+      "typeVersion": 1.1
+    }
+  ],
+  "connections": {
+    "Create single date items": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create single link items": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Retrieve the web page for further processsing": {
+      "main": [
+        [
+          {
+            "node": "Extract date",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Extract the HTML with the right css class",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Extract the HTML with the right css class1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "NocoDB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge ChatGPT output with Date & Link": {
+      "main": [
+        [
+          {
+            "node": "NocoDB news database",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract individual posts": {
+      "main": [
+        [
+          {
+            "node": "Merge Content with Date & Link",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Content with Date & Link": {
+      "main": [
+        [
+          {
+            "node": "Merge ChatGPT output with Date & Link",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Basic LLM Chain1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Extract individual posts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract date": {
+      "main": [
+        [
+          {
+            "node": "Create single date items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rename keywords": {
+      "main": [
+        []
+      ]
+    },
+    "Extract the HTML with the right css class": {
+      "main": [
+        [
+          {
+            "node": "Create single link items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Rename keywords",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rename Summary": {
+      "main": [
+        [
+          {
+            "node": "Merge ChatGPT output with Date & Link",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain1": {
+      "main": [
+        [
+          {
+            "node": "Rename Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NocoDB": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge Content with Date & Link",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract the HTML with the right css class1": {
+      "main": [
+        [
+          {
+            "node": "Create single reaction",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create single reaction": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge2": {
+      "main": [
+        [
+          {
+            "node": "Most reacted las 10 days",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Most reacted las 10 days": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger each week": {
+      "main": [
+        [
+          {
+            "node": "Retrieve the web page for further processsing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "instanceId": "c91760f3fa51256b2c240fe863631a27452c70950404c1124e207b756c74c71e"
+  }
+}
