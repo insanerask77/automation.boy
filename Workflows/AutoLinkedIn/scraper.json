@@ -509,6 +509,21 @@
         260
       ],
       "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -280,
+        820
+      ],
+      "id": "75084376-160a-4dd1-9062-e1b017665020",
+      "name": "Merge"
     }
   ],
   "connections": {
@@ -627,7 +642,13 @@
     },
     "Rename keywords": {
       "main": [
-        []
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
       ]
     },
     "Extract the HTML with the right css class": {
@@ -656,9 +677,9 @@
       "main": [
         [
           {
-            "node": "Merge ChatGPT output with Date & Link",
+            "node": "Merge",
             "type": "main",
-            "index": 1
+            "index": 0
           }
         ]
       ]
@@ -796,6 +817,17 @@
             "node": "Retrieve the web page for further processsing",
             "type": "main",
             "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Merge ChatGPT output with Date & Link",
+            "type": "main",
+            "index": 1
           }
         ]
       ]
