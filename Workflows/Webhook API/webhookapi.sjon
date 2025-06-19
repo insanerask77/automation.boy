@@ -1,0 +1,560 @@
+{
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -780,
+        80
+      ],
+      "id": "8a4bce13-6958-4097-a4d8-1ccb44b8cbd8",
+      "name": "When clicking ‘Execute workflow’",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  const text = item.json.name || '';\n  item.json.encoded = encodeURIComponent(text);\n  return item;\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -260,
+        -20
+      ],
+      "id": "34f3a2fe-4e5f-4cb6-8f89-f9125b245f44",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "url": "=https://dupesradar.com/wp-content/plugins/ajax-search-for-woocommerce-premium/includes/Engines/TNTSearchMySQL/Endpoints/search.php?s={{ $json.encoded }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -40,
+        -20
+      ],
+      "id": "2c12319c-c33b-4b0f-8c25-0b22c282603d",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "const suggestions = $json.suggestions || [];\n\nreturn suggestions.map(s => {\n  const imgMatch = s.thumb_html?.match(/src=\"([^\"]+)\"/);\n  const imageUrl = imgMatch ? imgMatch[1] : null;\n\n  return {\n    json: {\n      value: s.value,\n      url: s.url,\n      desc: s.desc,\n      image: imageUrl\n    }\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        140,
+        -20
+      ],
+      "id": "d80b8102-6e4b-4d55-8848-abda83bcc446",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        640,
+        -20
+      ],
+      "id": "6e6aaefb-b970-4dc1-bb77-bd4a35b72ca8",
+      "name": "HTTP Request1",
+      "alwaysOutputData": false,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "Precio",
+              "cssSelector": "div.wp-block-columns.is-layout-flex.wp-container-core-columns-is-layout-f5a44f5b.wp-block-columns-is-layout-flex > div.wp-block-column.is-layout-flow.wp-container-core-column-is-layout-f5bb311e.wp-block-column-is-layout-flow > div:nth-child(4) > div > ul > li:nth-child(1) > div > div.card-details-price > div.card-price > div"
+            },
+            {
+              "key": "Tienda",
+              "cssSelector": "div.wp-block-columns.is-layout-flex.wp-container-core-columns-is-layout-f5a44f5b.wp-block-columns-is-layout-flex > div.wp-block-column.is-layout-flow.wp-container-core-column-is-layout-f5bb311e.wp-block-column-is-layout-flow > div:nth-child(4) > div > ul > li:nth-child(1) > div > div.retailer-name > a > span"
+            },
+            {
+              "key": "RefTienda",
+              "cssSelector": "div.wp-block-columns.is-layout-flex.wp-container-core-columns-is-layout-f5a44f5b.wp-block-columns-is-layout-flex > div.wp-block-column.is-layout-flow.wp-container-core-column-is-layout-f5bb311e.wp-block-column-is-layout-flow > div:nth-child(4) > div > ul > li:nth-child(1) > div > div.card-details-price > div.card-details > div.retailer-product-name"
+            },
+            {
+              "key": "Url",
+              "cssSelector": "div.wp-block-columns.is-layout-flex.wp-container-core-columns-is-layout-f5a44f5b.wp-block-columns-is-layout-flex > div.wp-block-column.is-layout-flow.wp-container-core-column-is-layout-f5bb311e.wp-block-column-is-layout-flow > div:nth-child(4) > div > ul > li:nth-child(1) > div > div.card-button-container > a",
+              "returnValue": "attribute",
+              "attribute": "href"
+            },
+            {
+              "key": "format",
+              "cssSelector": "div.wp-block-columns.is-layout-flex.wp-container-core-columns-is-layout-f5a44f5b.wp-block-columns-is-layout-flex > div.wp-block-column.is-layout-flow.wp-container-core-column-is-layout-f5bb311e.wp-block-column-is-layout-flow > div:nth-child(4) > div > ul > li:nth-child(1) > div > div.card-details-price > div.card-price > details > ul"
+            },
+            {
+              "key": "description",
+              "cssSelector": "#tab-description",
+              "skipSelectors": "h2,p"
+            },
+            {
+              "key": "google",
+              "cssSelector": "nav > p > span.last"
+            },
+            {
+              "key": "genero",
+              "cssSelector": "table > tbody > tr.woocommerce-product-attributes-item.woocommerce-product-attributes-item--attribute_pa_genero > td > p > a"
+            }
+          ]
+        },
+        "options": {
+          "trimValues": false,
+          "cleanUpText": true
+        }
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        880,
+        -20
+      ],
+      "id": "6679b32c-3ff6-4814-ba50-ee86a2740291",
+      "name": "HTML",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "6b122475-a2bc-4d56-a711-82b7f12401a9",
+        "responseMode": "responseNode",
+        "options": {
+          "rawBody": false
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -780,
+        -160
+      ],
+      "id": "d821e88f-ef72-4a4c-8533-a7874715c778",
+      "name": "Webhook",
+      "webhookId": "6b122475-a2bc-4d56-a711-82b7f12401a9"
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        2060,
+        -20
+      ],
+      "id": "6f9af10d-e5bb-441c-9d34-2ac724548716",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b5b34691-1819-47bd-af36-dbc89f348920",
+              "name": "name",
+              "value": "={{ $json.body.search }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -560,
+        -160
+      ],
+      "id": "de7d877e-3d11-4013-9418-bbf64f9892eb",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e39092f3-4f1e-4c6a-b62e-d219687cb06d",
+              "name": "image",
+              "value": "=https://chatgpt.com/s/m_68517a79daf88191b78ffc9ea7f526f1",
+              "type": "string"
+            },
+            {
+              "id": "2e6d4dde-19c2-4ed6-8923-8cb12b2744e4",
+              "name": "Url",
+              "value": "={{ $json.Url }}",
+              "type": "string"
+            },
+            {
+              "id": "aa589243-f77d-4443-8cfd-3cda7c990582",
+              "name": "Tienda",
+              "value": "={{ $json.Tienda }}",
+              "type": "string"
+            },
+            {
+              "id": "579ae7bb-ed50-4cde-80c9-202c7b4599fe",
+              "name": "RefTienda",
+              "value": "={{ $json.RefTienda }}",
+              "type": "string"
+            },
+            {
+              "id": "fc1366ca-fe4b-4eb3-b786-74303f97e63a",
+              "name": "Precio",
+              "value": "={{ $json.Precio }}",
+              "type": "string"
+            },
+            {
+              "id": "ed371462-de9d-41d0-81a1-212e43f68c69",
+              "name": "description",
+              "value": "={{ $json.description }}",
+              "type": "string"
+            },
+            {
+              "id": "5cc4eb09-6a25-44eb-9fb4-9df3b37709cf",
+              "name": "format",
+              "value": "={{ $json.format }}",
+              "type": "string"
+            },
+            {
+              "id": "57371c31-f5e0-460c-8cb6-fd52d6583fec",
+              "name": "genero",
+              "value": "={{ $json.genero }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1500,
+        -180
+      ],
+      "id": "35803941-335f-4438-a2cc-12a901a2a96a",
+      "name": "Edit Fields1",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "779848f1-0d0e-43ce-9f59-c5928ca37bd9",
+              "leftValue": "={{ $json.image }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notExists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        360,
+        -20
+      ],
+      "id": "f721ccce-c8ad-4fef-848e-3ac91366cc1c",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "f8af62be-f374-4cc3-8966-1e99dd49a619",
+              "leftValue": "={{ $json.genero }}",
+              "rightValue": "Masculino",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1100,
+        -20
+      ],
+      "id": "7b9b2d89-d865-496d-96bd-2731eed7cf40",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e39092f3-4f1e-4c6a-b62e-d219687cb06d",
+              "name": "image",
+              "value": "=https://chatgpt.com/s/m_68517a86cb7c8191a88b6daace4dbaa0",
+              "type": "string"
+            },
+            {
+              "id": "2e6d4dde-19c2-4ed6-8923-8cb12b2744e4",
+              "name": "Url",
+              "value": "={{ $json.Url }}",
+              "type": "string"
+            },
+            {
+              "id": "aa589243-f77d-4443-8cfd-3cda7c990582",
+              "name": "Tienda",
+              "value": "={{ $json.Tienda }}",
+              "type": "string"
+            },
+            {
+              "id": "579ae7bb-ed50-4cde-80c9-202c7b4599fe",
+              "name": "RefTienda",
+              "value": "={{ $json.RefTienda }}",
+              "type": "string"
+            },
+            {
+              "id": "fc1366ca-fe4b-4eb3-b786-74303f97e63a",
+              "name": "Precio",
+              "value": "={{ $json.Precio }}",
+              "type": "string"
+            },
+            {
+              "id": "ed371462-de9d-41d0-81a1-212e43f68c69",
+              "name": "description",
+              "value": "={{ $json.description }}",
+              "type": "string"
+            },
+            {
+              "id": "5cc4eb09-6a25-44eb-9fb4-9df3b37709cf",
+              "name": "format",
+              "value": "={{ $json.format }}",
+              "type": "string"
+            },
+            {
+              "id": "585534c4-86f7-4026-ba26-83fac19e7297",
+              "name": "genero",
+              "value": "={{ $json.genero }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1500,
+        120
+      ],
+      "id": "b3f0ae1d-493c-4e29-a915-fce864602210",
+      "name": "Edit Fields2",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1720,
+        -20
+      ],
+      "id": "95efa0c6-cd51-4526-85f7-876fd77acc23",
+      "name": "Merge"
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [],
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {
+    "When clicking ‘Execute workflow’": [
+      {
+        "name": "ch men"
+      }
+    ]
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c91760f3fa51256b2c240fe863631a27452c70950404c1124e207b756c74c71e"
+  }
+}
